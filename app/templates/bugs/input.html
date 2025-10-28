@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bug Priority Classification</title>
+
+    <!-- External Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/header.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}" />
+
+    <!-- Print Styles Only -->
+    <style>
+        @media print {
+            /* Hide everything */
+            * {
+                visibility: hidden;
+            }
+            
+            /* Show only the title and table */
+            .results-title,
+            .results-table,
+            .results-title *,
+            .results-table * {
+                visibility: visible;
+            }
+            
+            /* Position title at top */
+            .results-title {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                margin: 0 0 20px 0;
+                padding: 0;
+                font-family: Arial, sans-serif;
+                font-size: 20px;
+                font-weight: bold;
+                text-align: center;
+                color: #000;
+            }
+            
+            /* Position table below title */
+            .results-table {
+                position: absolute;
+                top: 40px;
+                left: 0;
+                width: 100% !important;
+                margin: 0;
+                padding: 0;
+                border-collapse: collapse;
+                font-family: Arial, sans-serif;
+                font-size: 20px;
+            }
+            
+            /* Table styling for print */
+            .results-table th,
+            .results-table td {
+                border: 1px solid #000 !important;
+                padding: 4px !important;
+                text-align: left;
+                vertical-align: center;
+                background-color: white !important;
+            }
+            
+            .results-table th {
+                background-color: white !important;
+                font-weight: bold;
+                font-size: 13px;
+                color: #000;
+
+            }
+            
+            .results-table tbody tr {
+                background-color: white !important;
+            }
+            
+            .results-table tbody tr:nth-child(even) {
+                background-color: white !important;
+            }
+            
+            .results-table tbody tr:nth-child(odd) {
+                background-color: white !important;
+            }
+            
+            /* Remove priority badge styling for print */
+            .priority-badge {
+                background: none !important;
+                color: #000 !important;
+                border: none !important;
+                padding: 0 !important;
+                border-radius: 0 !important;
+                font-weight: normal;
+            }
+            
+            /* Adjust column widths */
+            .results-table th:nth-child(1), 
+            .results-table td:nth-child(1) {
+                width: 5%;
+            }
+            .results-table th:nth-child(2), 
+            .results-table td:nth-child(2) {
+                width: 35%;
+            }
+            .results-table th:nth-child(3), 
+            .results-table td:nth-child(3) {
+                width: 30%;
+            }
+            .results-table th:nth-child(4), 
+            .results-table td:nth-child(4) {
+                width: 15%;
+            }
+            .results-table th:nth-child(5), 
+            .results-table td:nth-child(5) {
+                width: 15%;
+            }
+            
+            /* Force page break if needed */
+            .results-table {
+                page-break-inside: auto;
+            }
+            
+            .results-table tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+            }
+            
+            .results-table thead {
+                display: table-header-group;
+            }
+            
+            /* Hide scroll container */
+            .table-scroll {
+                overflow: visible !important;
+                max-height: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content-area">
+            <header class="header">
+                <div class="page-title">Bug Priority Classification</div>
+            </header>
+
+            <main class="content">
+                <!-- Form Input -->
+                <div class="form-container">
+                    <form method="POST" enctype="multipart/form-data" action="{{ url_for('bugs.index') }}">
+                        <div class="input-field">
+                            <textarea name="summary" placeholder="Masukkan Summary" class="summary-input"></textarea>
+                        </div>
+                        <div class="input-options">
+                            <div class="file-input-container">
+                                <label for="file-input" class="file-label">
+                                    <span class="file-icon">📁</span>
+                                    <span class="file-text">Upload CSV</span>
+                                </label>
+                                <input type="file" name="file" id="file-input" class="file-input" />
+                                <span class="file-selected" id="file-selected"></span>
+                            </div>
+                            <div class="url-input-container">
+                                <input type="text" name="repo_url" placeholder="GitHub URL" class="url-input" />
+                            </div>
+                        </div>
+                        <div class="submit-container">
+                            <button type="submit" class="submit-btn">Submit</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Hasil Analisis -->
+                <div class="results-container">
+                    <h2 class="results-title">Hasil Analisis</h2>
+                    <div class="table-scroll">
+                        <table class="results-table">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Original Summary</th>
+                                    <th>Preprocessed Summary</th>
+                                    <th>Priority</th>
+                                    <th>Confidence Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if result %}
+                                    {% for bug in result %}
+                                    <tr>
+                                        <td>{{ loop.index }}</td>
+                                        <td>{{ bug.summary }}</td>
+                                        <td>{{ bug.preprocessed_summary or 'N/A' }}</td>
+                                        <td>
+                                            <span class="priority-badge priority-{{ bug.predicted_priority|lower }}">
+                                                {{ bug.predicted_priority }}
+                                            </span>
+                                        </td>
+                                        <td>{{ "%.3f"|format(bug.confidence_score) }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                {% elif bugs %}
+                                    {% for bug in bugs %}
+                                    <tr>
+                                        <td>{{ loop.index }}</td>
+                                        <td>{{ bug.summary }}</td>
+                                        <td>{{ bug.preprocessed_summary or 'N/A' }}</td>
+                                        <td>
+                                            <span class="priority-badge priority-{{ bug.predicted_priority|lower }}">
+                                                {{ bug.predicted_priority }}
+                                            </span>
+                                        </td>
+                                        <td>{{ "%.3f"|format(bug.confidence_score) }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr><td colspan="5" style="text-align:center;">Belum ada data</td></tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Tombol Ringkasan & Cetak -->
+                    <div class="summary-buttons fixed-buttons">
+                        <div class="dropdown">
+                            <button class="dropdown-btn">Cetak</button>
+                            <div class="dropdown-content">
+                                <button onclick="printPage()">Cetak PDF</button>
+                                <button onclick="downloadCSV()">Download CSV</button>
+                            </div>
+                        </div>
+                        <button id="summaryBtn" class="submit-btn">Ringkasan Analisis</button>
+                    </div>
+                </div>
+
+                <!-- Modal Ringkasan -->
+                <div id="summaryModal" class="modal">
+                    <div class="modal-content">
+                        <span class="close">&times;</span>
+                        <h2>Ringkasan Analisis</h2>
+                        <div class="card-summary">
+                            <div class="card-item">
+                                <h5 class="tinggi">Prioritas Tinggi</h5>
+                                <div class="count tinggi">
+                                    {% if result %}{{ result|selectattr('predicted_priority', 'equalto', 'Tinggi')|list|length }}{% else %}{{ priority_counts.get('Tinggi', 0) }}{% endif %}
+                                </div>
+                            </div>
+                            <div class="card-item">
+                                <h5 class="sedang">Prioritas Sedang</h5>
+                                <div class="count sedang">
+                                    {% if result %}{{ result|selectattr('predicted_priority', 'equalto', 'Sedang')|list|length }}{% else %}{{ priority_counts.get('Sedang', 0) }}{% endif %}
+                                </div>
+                            </div>
+                            <div class="card-item">
+                                <h5 class="rendah">Prioritas Rendah</h5>
+                                <div class="count rendah">
+                                    {% if result %}{{ result|selectattr('predicted_priority', 'equalto', 'Rendah')|list|length }}{% else %}{{ priority_counts.get('Rendah', 0) }}{% endif %}
+                                </div>
+                            </div>
+                            <div class="card-item">
+                                <h5>Total Bug</h5>
+                                <div class="count">
+                                    {% if result %}{{ result|length }}{% else %}{{ total_bugs }}{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}" defer></script>
+
+    <!-- Download CSV Script -->
+    <script>
+        function downloadCSV() {
+            let rows = [["No", "Summary", "Priority", "Confidence Score"]];
+            const tableRows = document.querySelectorAll(".results-table tbody tr");
+
+            tableRows.forEach((row) => {
+                const cols = row.querySelectorAll("td");
+                if (cols.length === 5) {
+                    let rowData = Array.from(cols).map(col => `"${col.innerText.trim()}"`);
+                    rows.push(rowData);
+                }
+            });
+
+            let csvContent = rows.map(e => e.join(",")).join("\n");
+            let blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+            let link = document.createElement("a");
+            link.setAttribute("href", URL.createObjectURL(blob));
+            link.setAttribute("download", "hasil_analisis.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function printPage() {
+            window.print();
+        }
+    </script>
+</body>
+</html>

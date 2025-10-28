@@ -1,0 +1,33 @@
+/* Header */
+.header {
+    height: 60px;
+    background-color: #fff;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 25px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-top: 20px;
+    border-radius: 20px;
+}
+
+.page-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #2d3748;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.user-profile {
+    font-size: 24px;
+    cursor: pointer;
+    color: #4a5568;
+}

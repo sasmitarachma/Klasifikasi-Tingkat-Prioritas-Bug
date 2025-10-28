@@ -1,0 +1,44 @@
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        padding: 10px;
+        justify-content: space-between;
+        position: relative;
+    }
+    
+    .sidebar-menu {
+        flex-direction: row;
+        overflow-x: auto;
+        padding: 0;
+    }
+    
+    .menu-item {
+        white-space: nowrap;
+        padding: 10px 15px;
+    }
+    
+    .form-container, .results-container {
+        padding: 15px;
+    }
+    
+    .input-options {
+        flex-direction: column;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .results-table th,
+    .results-table td {
+        padding: 8px;
+        font-size: 14px;
+    }
+}
